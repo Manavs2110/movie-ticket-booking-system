@@ -1,0 +1,119 @@
+### Movie Ticket Booking System: runnable requests (IntelliJ HTTP Client / VS Code REST Client)
+### Seed accounts: admin@moviebooking.com / Admin@123 · demo@moviebooking.com / Customer@123
+@base = http://localhost:8080/api
+@date = 2026-10-01
+
+### ---------------------------------------------------------------- Browse (public)
+GET {{base}}/cities
+
+###
+GET {{base}}/cities/1/movies?date={{date}}&language=English
+
+###
+GET {{base}}/movies/1
+
+### Theaters + showtimes for a movie, nearest first
+GET {{base}}/movies/1/shows?cityId=1&date={{date}}&lat=12.97&lng=77.59
+
+### Seat map (send again with If-None-Match: <ETag> to get 304)
+GET {{base}}/shows/34/seats
+
+### ---------------------------------------------------------------- Customer
+POST {{base}}/auth/register
+Content-Type: application/json
+
+{ "email": "riya@example.com", "password": "Password@123", "fullName": "Riya Sharma" }
+
+###
+GET {{base}}/auth/me
+Authorization: Basic demo@moviebooking.com Customer@123
+
+### Price preview with a discount (nothing held)
+POST {{base}}/discounts/preview
+Authorization: Basic demo@moviebooking.com Customer@123
+Content-Type: application/json
+
+{ "code": "FIRST50", "showId": 34, "seatIds": [241, 242] }
+
+### Hold seats (all or nothing)
+POST {{base}}/bookings
+Authorization: Basic demo@moviebooking.com Customer@123
+Content-Type: application/json
+
+{ "showId": 34, "seatIds": [241, 242], "discountCode": "FIRST50" }
+
+> {% client.global.set("bookingId", response.body.bookingId); %}
+
+### Pay (replay with the same key → same result, no second charge; paymentToken "tok_decline" → 402)
+POST {{base}}/bookings/{{bookingId}}/pay
+Authorization: Basic demo@moviebooking.com Customer@123
+Idempotency-Key: 11111111-2222-3333-4444-555555555555
+Content-Type: application/json
+
+{ "paymentToken": "tok_visa" }
+
+###
+GET {{base}}/bookings/{{bookingId}}
+Authorization: Basic demo@moviebooking.com Customer@123
+
+### Cancel (refund % from the theater's policy)
+POST {{base}}/bookings/{{bookingId}}/cancel
+Authorization: Basic demo@moviebooking.com Customer@123
+
+### Booking history (cursor pagination: pass nextCursor back as ?cursor=)
+GET {{base}}/me/bookings?size=5
+Authorization: Basic demo@moviebooking.com Customer@123
+
+### ---------------------------------------------------------------- Admin
+POST {{base}}/admin/cities
+Authorization: Basic admin@moviebooking.com Admin@123
+Content-Type: application/json
+
+{ "name": "Pune", "state": "Maharashtra" }
+
+###
+POST {{base}}/admin/theaters/1/screens
+Authorization: Basic admin@moviebooking.com Admin@123
+Content-Type: application/json
+
+{ "name": "IMAX", "rows": [ { "rowLabel": "A", "seatCount": 12, "seatType": "REGULAR" },
+                            { "rowLabel": "B", "seatCount": 10, "seatType": "PREMIUM" } ] }
+
+###
+POST {{base}}/admin/shows
+Authorization: Basic admin@moviebooking.com Admin@123
+Content-Type: application/json
+
+{ "movieId": 2, "screenId": 7, "startTime": "2026-10-05T19:00:00+05:30", "regularPrice": 280.00, "premiumPrice": 450.00, "weekendMultiplier": 1.30 }
+
+### Change a show's prices (only while nobody has booked it)
+PUT {{base}}/admin/shows/40
+Authorization: Basic admin@moviebooking.com Admin@123
+Content-Type: application/json
+
+{ "regularPrice": 250.00, "premiumPrice": 400.00, "weekendMultiplier": 1.20 }
+
+###
+POST {{base}}/admin/discounts
+Authorization: Basic admin@moviebooking.com Admin@123
+Content-Type: application/json
+
+{ "code": "DIWALI25", "type": "PERCENT", "value": 25, "maxDiscount": 200, "minOrder": 300,
+  "validFrom": "2026-10-01T00:00:00+05:30", "validTo": "2026-11-15T00:00:00+05:30",
+  "usageLimit": 500, "perUserLimit": 2 }
+
+###
+GET {{base}}/admin/refund-policies
+Authorization: Basic admin@moviebooking.com Admin@123
+
+### Cancel a show: every booking refunded 100%, safe to re-run
+POST {{base}}/admin/shows/40/cancel
+Authorization: Basic admin@moviebooking.com Admin@123
+
+###
+GET {{base}}/admin/refunds?status=FAILED
+Authorization: Basic admin@moviebooking.com Admin@123
+
+###
+GET {{base}}/admin/outbox?status=PENDING
+Authorization: Basic admin@moviebooking.com Admin@123

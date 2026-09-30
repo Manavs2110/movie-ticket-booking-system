@@ -1,0 +1,140 @@
+# One command runs everything (app + infrastructure + UIs):
+#     docker compose up -d --build
+# Infrastructure only, to run the app from the IDE:
+#     docker compose up -d postgres redis kafka
+# Ports are shifted off the defaults (5432/6379) so they don't clash with other local instances.
+name: moviebooking
+
+services:
+  app:
+    build: .
+    image: movie-ticket-booking-system:latest
+    container_name: mtbs-app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/moviebooking
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: mtbs-postgres
+    environment:
+      POSTGRES_DB: moviebooking
+      POSTGRES_USER: moviebooking
+      POSTGRES_PASSWORD: moviebooking
+      TZ: UTC
+    ports:
+      - "5434:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U moviebooking -d moviebooking"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # One Redis locally: seat-lock filter, rate limits, micro-cache and Spring caches.
+  # noeviction so lock/rate-limit keys are never dropped early (every key has a TTL). HLD §9.3.
+  redis:
+    image: redis:7-alpine
+    container_name: mtbs-redis
+    command: ["redis-server", "--appendonly", "no", "--maxmemory-policy", "noeviction"]
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Single-node Kafka in KRaft mode (no ZooKeeper).
+  # Listeners: kafka:29092 for containers, localhost:9092 for the host (IDE runs, tests, CLI).
+  kafka:
+    image: apache/kafka:3.9.1
+    container_name: mtbs-kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: INTERNAL://:29092,EXTERNAL://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,EXTERNAL://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_NUM_PARTITIONS: 6
+      KAFKA_LOG_RETENTION_HOURS: 168
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 > /dev/null 2>&1"]
+      interval: 5s
+      timeout: 10s
+      retries: 20
+
+  # Web UI for Postgres: http://localhost:8081
+  # System: PostgreSQL · Server: postgres · User/Password/DB: moviebooking
+  adminer:
+    image: adminer:4
+    container_name: mtbs-adminer
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+    ports:
+      - "8081:8080"
+    depends_on:
+      - postgres
+
+  # Web UI for Redis: http://localhost:5540 → "Add Redis database" → host: redis, port: 6379
+  redisinsight:
+    image: redis/redisinsight:latest
+    container_name: mtbs-redisinsight
+    ports:
+      - "5540:5540"
+    depends_on:
+      - redis
+
+  # One-shot: registers our Redis in RedisInsight (through its REST API), so the database is already listed
+  # when you open http://localhost:5540. Exits when done; safe to run again (skips if already there).
+  redisinsight-init:
+    image: curlimages/curl:8.10.1
+    container_name: mtbs-redisinsight-init
+    depends_on:
+      - redisinsight
+    restart: "no"
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        for i in $$(seq 1 60); do curl -sf http://redisinsight:5540/api/databases > /tmp/dbs && break; sleep 2; done
+        if grep -q '"moviebooking-redis"' /tmp/dbs; then echo "already registered"; exit 0; fi
+        curl -sf -X POST http://redisinsight:5540/api/databases -H 'Content-Type: application/json' \
+          -d '{"name":"moviebooking-redis","host":"redis","port":6379}' && echo " registered"
+
+  # Web UI for Kafka: http://localhost:8082 (topics, messages, consumer groups and lag)
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: mtbs-kafka-ui
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+    ports:
+      - "8082:8080"
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+volumes:
+  pgdata:

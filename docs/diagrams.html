@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Movie Ticket Booking — Diagrams</title>
+<style>
+  :root { --bg:#f6f5f1; --card:#fdfcf9; --ink:#15181e; --muted:#4a5160; --line:#e2dfd6; --accent:#b5541c; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+  main { max-width:1200px; margin:0 auto; padding:32px 16px 64px; }
+  h1 { font-size:28px; margin:0 0 4px; }
+  p.sub { color:var(--muted); margin:0 0 24px; }
+  #toc ol { columns:2; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px 16px 16px 40px; }
+  #toc a { color:var(--accent); text-decoration:none; line-height:1.9; }
+  section { margin-top:40px; }
+  h2 { font-size:20px; border-bottom:2px solid var(--line); padding-bottom:6px; }
+  a.live { font-size:13px; font-weight:600; color:#fff; background:#ff3670; border-radius:6px; padding:3px 10px; margin-left:10px; text-decoration:none; }
+  a.livesmall { font-size:12px; color:#c2255c !important; }
+  a.live.excalidraw { background:#6965db; }
+  a.top { font-size:13px; font-weight:400; color:var(--muted); margin-left:8px; text-decoration:none; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; overflow-x:auto; }
+  pre.mermaid { margin:0; text-align:center; }
+  @media (max-width:700px) { #toc ol { columns:1; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Movie Ticket Booking System — Diagrams</h1>
+  <p class="sub">HLD architecture and all LLD diagrams (Mermaid). Generated from the current code and schema. Hand-drawn HLD: <a href="https://excalidraw.com/#json=o2eKJEHBE2mQhD0nls4W-,9Qe0FpP-GsHtyHzEGKnKww" target="_blank" rel="noopener">open in Excalidraw ↗</a></p>
+  <nav id="toc"><ol>
+<li><a href="#hld">HLD — architecture</a> · <a class="livesmall" href="https://mermaid.live/edit#pako:eNptVF1v2jAU_StXeaIarOrHUx4mEaBbBaUZybROpqqM4xALx45sZy0q_e-7cQKFtbwQ596Te3zOsV8DpjMehBDkUj-zghoHabRUgL8RGdXW6ZIbOIdhVgoFTAqu3CMMBt9gFpGZphmsqKSKcfPYomaRryaTEUkqI9QaEs5qI9wWvoChjoMUpXCHfmz0gGF8SxaTJIWRVs5oKbmxIfylUmTUCa0QzY3RxiKuRdp6tTa0KhAa72dFWjugVQUvMAehrGuoWRhAqbNaUoP_Skvhij5gzXHJre2IND8k4cmMhikZUUelXodgOTUMAYo3eP5J-3B8R7xAISANhkT6kAnLdK2c7YPhea0yqHAwE_yzedGUIPMNAkOQmm36UNFtH5hWuTAlPjTbkEfAaOpxP-5nY5Jw6jwqhAXHsZALifqiYLG2bm1w_0xSUX6Ex4sRiVvC2D3uGH_sW9yQxdEetp98afiHxHRb8hP44mZffH8X_4rIfe1W-gWqeiWFLZDqAPhfbrZwCeg5PqJsSCirOWqHsmbcHKs2v09vb8hcO5EL1oYDlbJ1eQgVV9k-JTjck_j-e08Q1mj8M936VLBNB0FeTd-uI7WDKelNab6hIaxaawYHYoY7JHsO41l61sG9DLuOxq6l2Fb8o6cweUjJpKRCIjS5S97n_5fncUQ655KfM-yyujaMg87BmdoVR0qkF6TH2pyCoytM89lx9ZL0MLzuqQ1HPAVb6Od-E2h30ndFet0effAakU7q16SnvWVPXoLOIszc-uyj4Hh2_G7Ti3aNh-Nk3WTWi3UZYlIVlW06d0i3begilV4dL3eWlhz3T5WlrLEc-69PnTOcZrYNjX62bf2I0tfGH8oKdGdBev6khOBftIr4I9Sc1sMddRDzQPkixPsqhflDd8bwU0EfAgwe2po11-jrMnAFL_kSF8sg4zmtpVsGb00brZ1OtophCY3EsUFd4eXGx4Ki8WX3-u0f2yW3bw" target="_blank" rel="noopener">Live ↗</a></li>
+<li><a href="#layers">LLD 1 — package / layer overview</a> · <a class="livesmall" href="https://mermaid.live/edit#pako:eNqFVW1v2jAQ_itWPk5UaWnXSUibRMPWUZWNESZVMvvgOAexmtiZX2BR1f--ywutSWHjk-_lued8zzk8BVylEIxIsM7VjmdMW7K8WUmCP-OSjWZlRiLKlbRa5TnoX22s_kUX9EapRyE30UuYrNz5efKBxMDsjJVvA-O0EPIkrIkuYO1kGh2lHNIbrXYGTkAjZlmuThWOM7U7XvaSToThykl7AjrXgv-v47nKBa-OE1zRsbPZCfh3ZxP15w0QZNoTIqYG9FZwIGdESAt6zTgY8pGULkFuMp5PPdL4gibtoEekm3jcwTv2zvvDga56oU7AzutXHVLeTnlEImGrcJlhKugw5hpAhjO1FRDWow5bqfqFMfLTsA1EGfDHgynFl7Rs5zwi3cB74L1KPXdTSjnbgfrZDZ3Pc0V1o1jZKDYivn5HbvyelqwqQFpsqz30-DvvLc5hxyofek2lsmItcGRCyRFppe7Bv3kpMar-jw2Y7jcgfBc2GyBZjsuAY9siORFFmUPdSlPLeJ1MXx5rRz7F1ONi-5G7NOF9xfzYqRFPh9gos5nK0xFZ7tQ9q0DXNF_R07v-AlJh6ti94o9fRG4PKXoon-SSHszTb7wNzOt3YbLXgv6o8cEZV7zG7tXmpBIN3RU9lN_nm2Hvh2uwjyjb8g_Ph9c1oq_tApexVEZYpSuUMkYtcYUn-MbI3XzcZc9ogd_pWmokEFaAGeDJFXuJJ0uaWoVhDb8dGEtCPJkSbwh44EqnCOgW4PMWa8zAeJI94Be-KJSs62utNCZPkijHOw1aeW4d0-mAaLxaLgphEdciI3J29onErRE3xrQ1po2x6C7ZGDMfM1n6eYfWQzAgAUpTMJHWf05PqwCnWMAKjVWQwpq53K6C5zqNOaviSnIMWe0APa5Msc-JYPhmis79_BdvRFCc" target="_blank" rel="noopener">Live ↗</a></li>
+<li><a href="#class">LLD 2 — class diagram (core)</a> · <a class="livesmall" href="https://mermaid.live/edit#pako:eNqVWNlyGjkU_ZUunqCG5AOmXK4y9iTjCU6IcWpe_CKkC6hQS0QLNuOxvz1XakHUixrDg3G37nruKl4GVDEY_FkMqCDG3HCy0qR8lAV-wptiotSGy9W1klYrIUCnh3Mg9o5suw_viYUpL7n9xIXNHIEuXqoD__nD6v0V_em4hqEzoG_ZuADJtopLOyoWSgkgsiJ_rYkDxs1nRzRLpV1cUK6p47ZYaCAb0JeXHbzRvznoHadQ50e1oJeEwoEzGLlWgh3N-xsf7uGnA4MWRln3YLZKGkh4tmR_ZFlUVP5fzqDcKguS7r_AflwgWQnSPqgNyD5xlEgKoi3xNM98rZ6GBv94Yv9wHV4LYrmSyOWEbfF8UjqwJWp2irOTYN6WW9Fx-t2B3p-DNzdW6d_4UaeN0uPC8P9gVMzICjq85WZuuRCYmUuuS2BXks3pGpgTwFJHakkVODUsnWRmeB--55ZYZ0bFFI14q14dtL11ABAL4gzvTMURY4IpsfyqJNwRS9ejohUQQLH2GL9MFLwRPi_PsEIDgruDoxUIsAXmBd0yU0uw-0AZ0iXhJwsimZLD5DQ1r0omQXiZUowLX0qYXRHeqZKrt9TZZ6yMJFrYDJ63QKNh5lgu_3LU_TQqvm29VCLebqWxRNpUFq0SoUeYPwF2RzR2ih8Sk6c7OfCFgTSDENA2QVJm44IIEZHMhuzhSU3JHnQjdK0m58-nim6qlprrnccotuI3LqxFxyJhG-uTnI2YlgjXJADXy-oqPBvMBzD7OLmkwjGodOQknIv2P2xBe5C-XgPdKGdnmlM04z31s0XSypHKDXTCD1b0PDQtbFOeYOLnEKZqmlE7IniVggl7MD7UhD_pajTRtjNKPJjYVHRQE8xjOWU33FCFMTxLG7YqeBqmKKBKt7DKEkyFg8jvDsdfLaIMoAxsIXEifI24r_gOJoRuIl020ActPwxOiff1Qa8e2CQZN1HFsc5bqVTTUi9ZPy9mSnC6P6sZBzbQFJvb0K4xKqArKd6gtcIBOIGl0iHxc5bNquZ4ziiyRNvIljZKUnrvmtvK6KAh7bJrolcwjH25uc9ch9PWTKvcvbKf0c0n3JNW1TeCd1A9Ko6Tt87q2091hA0oKvMWL50Q-2xWRLujvvcgE_3qBuIsN9_pXc3eO2z4dZvT02_OLtTzOaXpFoKb9dDut1iaZLXS4I3yuKEjQpF2vZm4OvXwjAvm4Mq2p35YIWc4XDCbhjVOL6w5P31EZ1pRMAZDCrsQ0L7dv3J_VvnUGInR0xsHw1yVfCHLDXnAcOIGXKvdr8ryJadhUcEt0riyIRy3nbjQ_uWtvEOLsfxb_jMg7BTha07xHGGrq82vkfI8NVO1amt6jAg3rm7Fhw-X6Z2tQXQgON7CqvPWzTFQ1a8I76BMrwsVeevWGcjrq3dN8KE4Lv7_-DF7R2m_P4pt7QkZ2sbi0EvbmKm9tB1zpJe-3vp7SWvd4yQQTXybN40AcO8umzn8nUD1Dfc0U3aX69qXu9K0ue0FAGvbVZ6uM4jNbSklTFaE-m4SkMssE41JnkS4Ng4aYy1IzI2OZtf0MjtaYWcTzKRNljZbx1mOrsbUZIitMXjZ2csG42KAAkvCmf996-VxgJtUCY_48DhgsCR-2A5ePRlxVs33kuKR1Q4H3MBtGYIQfw6Lr19_AailZzI" target="_blank" rel="noopener">Live ↗</a></li>
+<li><a href="#er">LLD 3 — ER diagram (14 tables)</a> · <a class="livesmall" href="https://mermaid.live/edit#pako:eNqlV21vIjkM_ivRfNqVuvsDKt0HCtMtKjAcMHtXCSkKMy7NNZPMZRIo1-1_X2de6LxuuTu-tMSxY_uxH5tXL1IxeNfEAz3hbK9ZspUEP-Pp5oH8-PHli3olmzt_tPFX5Jo8sawQV0dvCm_8ICv_NlxM6DKYTccPeG_rqQNozWMgnxbhbEZ-IzE8MivM563XtFC-sR6vfH9Rf6I8qeR4Ozcs2ElZc0WyJ6YhJrsT4SbDb-qYVaZbmnfBH86uykxpeR58n_ot8dbLIg0g0SSXZ0NOVnOAzoLxfXHZMGMzkoImGTBDPgkVPaOuwu9K4F8pTudQc997zZRa7Oz6TRDcTxff-m6royz9Hy2XNFy_565SuiYJe4as6_v7hUelex8qv9Lpxp_nnqWaR-iZCy7ri6OjkIfdDaQskMl0PQ7CxYaOg4mP921W-dlyZDl6mPuLAuqUcQdwNzdfv-LNINzcBH9S_3t1ne33GvbMAEU1BGTPIyZyEFppey2-u8-O77k0BBWW9--nB6YjLC8CCeOChD2SlGXZUemYYrk-dcVaCUCPRpP5FOuQjMP1Jpj7qyqSt1qPXeyMZAl0T10hQsNq1VgfGi5PI25OLmO3H74pbQJYFkQww42N-yRK7lui8hUNj1bGNFWCR-VzmCBphWA7AVVicgWFyWOSsMjwQzO0srEvjcw8YfWCviw4p1BwC0XqyriSzadd7V_6cEElQ-9qdaQYNYjm467VKCZyB7oHZic0p9RV1cr_Fs5G2P1kufLn03B-YfYK2ru43hBj0cpPbDVCryRNuLSm6uC6kmByb9m-p1D3IHWfRgTa8Eds1VYZ5_x1acITdeDQzvcvwTA8AeydJDX_uB7SmF1eL4e6HLBwm9Kq3pFvrGCa5mzZFacaEm6TIfER4NnZTnAu8lTwXuCLQbP11uM7fxLO_Injk9Fi7M_w_zryLta-ym1S78Xwu72gl_rKKryduWFAlv5qjARcd6QK78CE7Yk6YS805lmkrDQ9Ui4p8mo9Fc5Jm2FRUcETbtoCiGnLljvHyUxRpus6ZUKay8p_5N-qz3hGy83GLT0SiNEWl54UK4ozQazkf1v4XE_PX5mSO6KtAAcrxnunrM5uAEczXJU8uQQdAYbUnBfVALy0K_L4B5oC96UhfipKrgtNZndGGSa6kgpOypJ-VHO9jrT05aztSq7jb5nn8yVc-gASiPtb9Qm3EAovKUeuocz0dWw-h9qu1EdUmfsubxdyDSyrWqxHXM9eE7diV7oUPAz8mcv9EH5uHgzh52StAfPOSGcmqg22YsV8HayS5bAD_8LzEkknHoQPED4EhouGj9VS-D9zVyWhDf5Q4Vfn-DMmSZUBiZvLM5x6WdHtnUd2wup4bLje2FIH_EcagAOW3DSu88R5CXWifPZ3tBsb79Yrw0ajXb5J2UkoFv9iwCyCDV1vRqtNPmKmC_p76Id-vmUEY3-9zo9vR9MPRhAzBrNlsn6AJbwgSxRXGv3ZmMcu4CFhqlUEmWP96sabd0U8RBaX9dj9kn3derj5IVl77ldByc5bL7_GrFHrk4xQ5IgaT2waYwLL377l8dtPCRKY0Q" target="_blank" rel="noopener">Live ↗</a></li>
+<li><a href="#seq-seatmap">LLD 4 — sequence: view seat map</a> · <a class="livesmall" href="https://mermaid.live/edit#pako:eNptU1tvmzAU_itHvIxojZKxvAxpmZKA1mrQdNB0e0CKXHMCVsFm2LSrqv73HQfSqMl48eW7-Ph8-MXhKkfHB0fjnw4lx0CwomV1JoE-1hklu_oe22HNjWphA0zDqtNG1QegYa0RXDRMGkhji6fITMyaFNtHwfGclVhSgrnQ51iwtOCN0qZoMf0ZZbLnbMbzeRr78D28hYku1ZOezLyJppM0uFe78bWSOI6Z4eWoF6QxKZJeYGk1a_yZB64HGmrBWzXmjJc4sFllYL-GUph-azAhl40Pn6czEDsIb1kBtT0F9QVgpRG86bRX5gQ0vXQP9Ha10Pqd376oij2rzoDagSGOvc4HDZq3iBLc3m10VKnGHBRSDXXmR_jNOFj6kIZRuOpvrOHXZZiEg-9W5PAVvh1lKPOTwk7020rxh4MHldg7UA8X1wG490o90J3XCZRY5dtOGlHBnAp8ckejE2MbHP0vBULWeZ--kMPd4ipaLKMQJnAZRgENy_X6R7ifROuVnX2EpqXfR9PEtv28ien7ZG9-2yym_wnPRmSJNqDBjQaJf82qZLLAxZA4dcS5AIcqrZnI7ct4yRwKqMaMFpmT4451lcmcV0uzDyR9lpwg03ZIO12TM3N4RcP26z_WeQQb" target="_blank" rel="noopener">Live ↗</a></li>
+<li><a href="#seq-lock">LLD 5 — sequence: lock seats (two layers)</a> · <a class="livesmall" href="https://mermaid.live/edit#pako:eNp9VFFvmzAQ_isnXkq1TEu7aVN5qARJqqChpAUy7SFS5MC1sQI2s03bqOp_3xmcNV2y8YR93_k-f9_5XrxClugF4Gn81aIocMzZg2L1UgB9rDVStPUalVsXRipYANMwarWR9T7QMGV4wRsmDKSJjafMYMJrbm54ZU7BoszCIim3XDxkqB55gXHdVMfIbGqR-ZNM2A5VhsxMZVW6lBP1u_JYcn0cG0c2eCu1eVCY3SVL0WMWH6-v0ySA23mWw6d1T0rDi97Ip7gcgKaicalfe3SaWHgA8WyUgqqCVqMKNsQpqLloDYJf2ZvDxfD8ICHKArAg321GGW2OowAEPptHVvlnru6Klyuy4-wQl00DUEh1HtH_Q0oqg2XWUxuAy45Ll5dNe5ZJyyAc3S3idLIKkwT8PE_g8xC0w7HKABO77o6wxR3gM9fGiecI0EmLAL4MryCbhHm2WszCH2GchFEyAd_JqUFIA0a2xQb3HLDSaM_UdLoBn5qnMwbWu4ZpjSX9wFoh26I6f1ewVyb_GYC9LdzMU7pPmE5g2Q6H629ANYqt3q_wueEKQRtWYafxPtAoapH9ggvSz-x1gukkGcMH4AZr_Vdtq3ZRMV77vebMcCkG5CeQwQdEO4kt0XiWTdK8k3BVyWJLJS-Hl19hPoPRfHaTxKMc_N6vg3SrfFeGhLjHJ1RgNkyQz_QUNUHfkO9USedJEoWj7yfCljhbM1FK4Z9bEhdXl05yhRUyjUdJ_7H2Ddv5WMiauvqI177P2D29cwcKyBKDouy9N9JJd4IxJSK9Y9NpV7Mm6Lv7HzQvhxedb4PO5Ulnuw7NAVHhUunHG4BHE6pmvLQT7mXpmQ3WuKTF0ivxnrWVWXqvFmYHXbYTBYWMapF22qakCeamodt-_Q0mUpV7" target="_blank" rel="noopener">Live ↗</a></li>
+<li><a href="#seq-pay">LLD 6 — sequence: pay and confirm</a> · <a class="livesmall" href="https://mermaid.live/edit#pako:eNp9VG1v2kAM_itWpElUawVk66ZGWqdCwotKSZaA1klI6EgMnMjlsuTSNqr63-e8FQrt-ETsx_bjxz4_a74MUDNAS_FvhpGPJmebhIlFBPRjmZJRJlaY1N--kgnMgaXQz1IlReOIWaK4z2MWKeh5hb8n5Y5HGw-TB-7jWMThKdLsFUhHpmqToPdrcopwC4CLAU9Pfc6wjGa5wEgNmcJHli-iCje_uL7ueQY4tjeD9qrikrafefDSjlkOrXGAIpaKOs4vbjE_q8J6HsWZPYPqlFlhlQPfI2GH-U9YZHr3SocE45AyqS0CPvFUUQGypVmojnLN7rsG1BRgYLswd8ybmUV5Op3Vd0i38hEoPAzB648scz6xzMaHT1Q3gBSZWobS30GLiuvfLuESBI_OGliCAaIAUsmXGbGuzc7NnztrOls61tQcT4eNuemtNh-wdQ1ga4UJ-FIIroymflmaek8PsM7QAH_Lkg1CK5KgEhaltB5cRiBjjGpBWaggQD_kEQaV5UiavdSDm_FB541eI2vyatvwB9w3uWL-7k1Kyjk34GtHf228SlmBMEwRWBwn8uEDKrpxIHRRHwP4QY1l2BDo29PB2L3bs2y4e_N-3_K8xiwztZJP0LPtWxJ4eRKW-lsMshDBG9m_l651N56algutchWKCXd10GF7tqdZ6OjLaM0TAWvGQ6LWKnmG9HigXS2Rz-j9huQ7CHwzrwTXGY1zndGuMVGo-A6wEuPLfmWte2fsEvnPTXyr2-l8Om_UqFU-O9bEtQZzaus_09uvb4iMplOonx5pWGVZOq5dCNwM852pX8HInpjLhmyr4vpGi3IFahUPd-Dj_Rcs2ZVjpIzEmoeV0MWbaF4oXTdVMhcs_oCc3unsV-eATlRzoD_aOWh0TAXjQXGMnxca3RWBC_pYaAGuWXFWtJcCVtxkL498chW7SZYsDuj61Ye7Nr_8A1IYzMc" target="_blank" rel="noopener">Live ↗</a></li>
+<li><a href="#seq-cancel">LLD 7 — sequence: customer cancels</a> · <a class="livesmall" href="https://mermaid.live/edit#pako:eNptU--PmkAQ_VcmJE3OnFftfWnCBxMRtKZWtyBpm5CQFUbdCCzdH3dnjP97FxesPcs3Zt68eW9m9uRkPEfHBUfib41Vhj6jO0HLpALzUa14pcsNivY_U1xADFTCREvFyy5RU6FYxmpaKfCiJu9xfmDVLkLxwjKcl3VxjwxJgwxxq6uc8IJlxxZ-D_W9Bkq4VDuB0ffFf8gsV87kfY7MLtX0WGKlZlThKz0mlcXFT6ORF7lAVtEaBhsrWw5OLD8PMmom0gr3IgP0PRfWPz-50OJgugohJv54HUCih8PNZ5B7_goVVyCVUYD5TXVIXBDWLYrMSHlQezRqxEcbTevLEFKW92HPtZAebrmxaxh7liYkT63cD9AVA39BIViOfcBCIuS4pbpQYMlA6AJl750HgQVSg5WGIS14dujUT8bLSbBYBH4XsMqABEt_vpwBr67WWwDXasPfwFutvhpAekdgZwg1VnlTFX1Z_UjD4Nt86Qfh7WxcoNvGTcbLkqm_Ei_qDniU8HhpYphLKg4oZNcBzcmoi5WS1paS16pTTkuuzQmMYGhT145k1m3jwWJ67wB22c8dKjULVVpCFE8mQRQNpuP5jc3aHheEwTQ21nwYABmH6_l4sfiVXoP_zsyGUxKuGsLAt_3NoK5zMSpiF56Hw5vFPLZ6nD445gGWlOXNAz4ljjmIEhPzkzjtESTOuYE17zg6VplJKaHNoTi6zs3ttI-9DZ__APezTak" target="_blank" rel="noopener">Live ↗</a></li>
+<li><a href="#seq-showcancel">LLD 8 — sequence: admin cancels a show</a> · <a class="livesmall" href="https://mermaid.live/edit#pako:eNp1U--L2kAQ_VeGQMGjPcz1S8EPB4mJ3oEX08SjLQRkTEZdTHbT_XFWxP-9uyZ6Lbb7KTPz8ubtm9mjV4qKvBF4in4a4iVFDDcSm4KDPWi04KZZkezjUgsJAaCCoGoY77ItSs1K1iLXEOauGAqxY3yTk3xjJT03bX2LjEKHTIXSG0n519ktInOAjCqmbmvp9Pw3Hhrieoqa9ngoej3B_eNjmI8gnecLGKITOlRbsVfDI6tOwxLtNXtBYW6xUTiCxfcROAxM5hm8plGwiGGwR6YVrO2VGb9f12yz1bAVdaXuoDC-v_oCSqM2CsZBMo5nszi65N9IKiY4fISHrlEtRAuE5Rae4lkEQ0iDHy9xslimcRI9J1ObGc-TyXP2YklWnX0wEHsOWiJX1nhLd9dx_SVcUk2oCBSh1dq3v9EjaW14BQ--_wHyp_m35Q1CGL0Sv_5T7CyzLNbK6rIM7ohWw94O4qr9vXRVmU5Hl_5rU9eAjTBc_wPYXccBl72vffu2GzNk8eQ1if5sQrzqguvHmSm7-pK7mQ7Qtq1FuYMdHd6HR3Y59dm4BltAq69mSlvj1ZXKcgUj-Oz74IjGZxtqdLPISJlae5_Aa0g2yCr3iI6Fp7fUUGGDwqtojRZTeCcHc28pP_DSlrQ0ZDOmrezi9g-uT59-A5kKHrQ" target="_blank" rel="noopener">Live ↗</a></li>
+<li><a href="#seq-events">LLD 9 — sequence: events → Kafka → notification</a> · <a class="livesmall" href="https://mermaid.live/edit#pako:eNptVF1vozAQ_Csrnqgu0al9u-gaKQUqRckRWojUh0iRgSWxYmzONtdEVf_7rQn5uGt4AXbH49nZtT-8QpXojcAz-LtFWWDI2UazeiWBHtZaJds6R338b5i2vOANkxbCJ2AGEmXsRmP6MgdftTZX-zX-QWnvvi5IHH7RYZI2F9xsUYNPaH2ABzA3Vszcihmrdgz8XKkdl5thx34LHDhwrCyveMEsVzJQ0rT1Lenx_9AUZemAR6hQqoGzrgFobJBZeN9ygZAzW2yBG6haIY549yTD8Th8GkEazaMgA2OZbQ08QrzI1mk2ec2iECZxCBL3ds2sxbpxb_j5CFK9-3fwvHiFZRJOsgjS2TSB-SKYReG_G8xGYEgp-Ds8EHdvybS8u8CYsMCKHXEKLDdYXjLXKnt503j9soyW0cDRdnJ6NZdVKAxCxajyEr6D5TVSl2-T9lUZ-Ab3gy-F5qRKVRX4z5PpnMxglaX212x_vZns9Z4_ZsQdjKBEwakf8HSsOHIz8AuNYRs84oJeQ_Y2Ik69S7QqKE-i_VORsGof7n88QPK6CKI0jcJ-484xoZGVh0sOlIZgEgfRfH7dhGDYd2HHG_DLthFugLBn6rzSWHM3TJC39tQhMpWGSm4oWihZcV1fN-aa9EJ0nR-P41PneUmGKksn9QDHKegOxHkGzs7ReCMoZ1owIHLcF9i4UT_ZkL2BVkKYrjGnoEZLQ29VwwtzipXkzFCgde3qMt4APDpWNeOluzg-Vp7dYo0r-ll5JVasFXblfTqYuz_SgywoZXWLFGmbkgzrL5k-_PkX_uJtAQ" target="_blank" rel="noopener">Live ↗</a></li>
+<li><a href="#st-booking">LLD 10 — state machine: booking</a> · <a class="livesmall" href="https://mermaid.live/edit#pako:eNp9ktFPwjAQxv-VSxMTUIhAfPLBhMBUEpgEfdA4Q2rvxhq2dmk7hBD-dzs3XELEvvW7u999-do9ExqJ3QKzjjsaS74yPOtuBpECf94vP6DbvYPHYDqGW0h0iq12VfqRytp8-DYLwpflPAjHk_DBt-V812pDVAx6_RtItVgDbR0pJOwASit0oRwYQqKMsKKdQkrw6Cm8nyxmQblZJNysCPQarsASdxaEVrE0_wJq1_UskkilIjwa-3WykhtS8MnF-jwqeJ1PFpWTai_EXKYNjBdOdw3FhcKTeJrJMr0lbXNpyC658zFZ6wktJOMdIGjlQ-F4mu9oGI6C6bRazpWg1Id7DRwzqWrBgk30VzXXpHZ2uPac61SKHVSu_yQeO_u93gXrAMvIZFxi-V32EXOJf7_IXyKGFPMidRE7lG1lGM87JXzJmYK8UuTY_K5aPnwDUufBgw" target="_blank" rel="noopener">Live ↗</a></li>
+<li><a href="#st-seat">LLD 11 — state machine: seat (per show)</a> · <a class="livesmall" href="https://mermaid.live/edit#pako:eNp9kVtrAjEQhf_KkKfaKq37VsHCigstXfCh0JemSJrMajAXyaUi4n9v4i66SDFvmTn55pzMgXArkEyA-MACziVbOaZHvwU1kM7X_TeMRi9QfpZvdTmrK5iAseCRhaWyfAPO7lrlRZH1r1U9T1KumNRAYzF-LrIUpPHoAgq4W6MSy2iCVDBNyB08wPgJtDSDlnciZNRssXivTjBrGunOuB9rNwk0heAiXr3p2-0N2jLv8-zsJMXd-2GCppYH5qFxiIMbHM4MRwWPZx8NkyrReukEKkzhWkjn-xqTbUuz6nD_A8gQiEanmRR5MwdKwho10nShRGDDogqUHLOMxWA_9oanVv6HVIlbcVlkVz7-AQdylQU" target="_blank" rel="noopener">Live ↗</a></li>
+<li><a href="#st-outbox">LLD 12 — state machine: outbox event</a> · <a class="livesmall" href="https://mermaid.live/edit#pako:eNp1kU1rAjEQhv_KkGOrUKUnDwXRLUhFW1dP3SKzyawb3EwkH7VF_O_NqvQDbG55k-fhTeYgpFUkBiB8wEBjjRuHpvveLxjSer15g273AWbz5TpfDhfLbAwD2DsdAjFohlATlNFrJu8hOGSPMmjLZ_w31moms_XLKltlybGLZaN9TaoDT1htEVBu2e4bUhtS1-m_JS4CqFAnCIrYv-vdA6ZiZhc83EKvA2WS2qq6rnscTqYnk8GPH84Ryvq_BqPhbJRNz5Qjo1mRA1sBgkSW1LRFSmu3mjdnwfeDW_p5MR9leX6ipWUfTaJrZNViOogOiJQY1Kqdx6EQ6XMNFWlTCEUVxiYU4thewxhs_skyHQUXKSVxp37Gd4mPXxmWldQ" target="_blank" rel="noopener">Live ↗</a></li>
+  </ol></nav>
+<section id="hld"><h2>HLD — architecture <a class="live excalidraw" href="https://excalidraw.com/#json=o2eKJEHBE2mQhD0nls4W-,9Qe0FpP-GsHtyHzEGKnKww" target="_blank" rel="noopener">Open in Excalidraw ↗</a> <a class="live" href="https://mermaid.live/edit#pako:eNptVF1v2jAU_StXeaIarOrHUx4mEaBbBaUZybROpqqM4xALx45sZy0q_e-7cQKFtbwQ596Te3zOsV8DpjMehBDkUj-zghoHabRUgL8RGdXW6ZIbOIdhVgoFTAqu3CMMBt9gFpGZphmsqKSKcfPYomaRryaTEUkqI9QaEs5qI9wWvoChjoMUpXCHfmz0gGF8SxaTJIWRVs5oKbmxIfylUmTUCa0QzY3RxiKuRdp6tTa0KhAa72dFWjugVQUvMAehrGuoWRhAqbNaUoP_Skvhij5gzXHJre2IND8k4cmMhikZUUelXodgOTUMAYo3eP5J-3B8R7xAISANhkT6kAnLdK2c7YPhea0yqHAwE_yzedGUIPMNAkOQmm36UNFtH5hWuTAlPjTbkEfAaOpxP-5nY5Jw6jwqhAXHsZALifqiYLG2bm1w_0xSUX6Ex4sRiVvC2D3uGH_sW9yQxdEetp98afiHxHRb8hP44mZffH8X_4rIfe1W-gWqeiWFLZDqAPhfbrZwCeg5PqJsSCirOWqHsmbcHKs2v09vb8hcO5EL1oYDlbJ1eQgVV9k-JTjck_j-e08Q1mj8M936VLBNB0FeTd-uI7WDKelNab6hIaxaawYHYoY7JHsO41l61sG9DLuOxq6l2Fb8o6cweUjJpKRCIjS5S97n_5fncUQ655KfM-yyujaMg87BmdoVR0qkF6TH2pyCoytM89lx9ZL0MLzuqQ1HPAVb6Od-E2h30ndFet0effAakU7q16SnvWVPXoLOIszc-uyj4Hh2_G7Ti3aNh-Nk3WTWi3UZYlIVlW06d0i3begilV4dL3eWlhz3T5WlrLEc-69PnTOcZrYNjX62bf2I0tfGH8oKdGdBev6khOBftIr4I9Sc1sMddRDzQPkixPsqhflDd8bwU0EfAgwe2po11-jrMnAFL_kSF8sg4zmtpVsGb00brZ1OtophCY3EsUFd4eXGx4Ki8WX3-u0f2yW3bw" target="_blank" rel="noopener">Open in Mermaid Live ↗</a> <a class="top" href="#toc">↑ top</a></h2><div class="card"><pre class="mermaid">flowchart TB
+    C[Customer / Admin client] --&gt; LB[Load balancer]
+    LB --&gt; SEC[Spring Security + rate limiter]
+    SEC --&gt; API[REST Controllers: validation + errors]
+
+    subgraph APP[Spring Boot app x N instances - modular monolith, stateless]
+        API --&gt; CAT[Catalog: search, near me]
+        API --&gt; ADM[Admin: pricing, discounts, refund policies]
+        API --&gt; BK[Booking: lock, pay, confirm, cancel]
+        BK --&gt; HOLD[Seat lock: Redis filter + Postgres claim]
+        BK --&gt; PRC[Pricing + Discount]
+        BK --&gt; RF[Refund policy]
+        BK --&gt; PAY[Payment]
+        RF --&gt; PAY
+        PUB[Outbox publisher - every 2 s: events + due reminders]
+        NOTIF[Notification consumer]
+    end
+
+    PAY --&gt; GW[Payment gateway - mock]
+    PUB --&gt;|publish| K[(Kafka: booking-events + retry / DLT)]
+    K --&gt;|consume| NOTIF
+    NOTIF --&gt; EXT[Email / SMS - mock]
+
+    subgraph DB[PostgreSQL - source of truth]
+        T1[(catalog tables)]
+        T2[(seat_lock: PK show, seat)]
+        T3[(booking, payment)]
+        T4[(outbox_event: event log)]
+    end
+
+    CAT --&gt; T1
+    ADM --&gt; T1
+    HOLD --&gt;|2: final claim| T2
+    BK --&gt; T3
+    BK --&gt;|same transaction| T4
+    PUB --&gt;|reads due rows| T4
+
+    CAT -.-&gt;|cache| R[(Redis: cache, seat locks, rate limits)]
+    HOLD --&gt;|1: SET NX filter| R</pre></div></section>
+<section id="layers"><h2>LLD 1 — package / layer overview <a class="live" href="https://mermaid.live/edit#pako:eNqFVW1v2jAQ_itWPk5UaWnXSUibRMPWUZWNESZVMvvgOAexmtiZX2BR1f--ywutSWHjk-_lued8zzk8BVylEIxIsM7VjmdMW7K8WUmCP-OSjWZlRiLKlbRa5TnoX22s_kUX9EapRyE30UuYrNz5efKBxMDsjJVvA-O0EPIkrIkuYO1kGh2lHNIbrXYGTkAjZlmuThWOM7U7XvaSToThykl7AjrXgv-v47nKBa-OE1zRsbPZCfh3ZxP15w0QZNoTIqYG9FZwIGdESAt6zTgY8pGULkFuMp5PPdL4gibtoEekm3jcwTv2zvvDga56oU7AzutXHVLeTnlEImGrcJlhKugw5hpAhjO1FRDWow5bqfqFMfLTsA1EGfDHgynFl7Rs5zwi3cB74L1KPXdTSjnbgfrZDZ3Pc0V1o1jZKDYivn5HbvyelqwqQFpsqz30-DvvLc5hxyofek2lsmItcGRCyRFppe7Bv3kpMar-jw2Y7jcgfBc2GyBZjsuAY9siORFFmUPdSlPLeJ1MXx5rRz7F1ONi-5G7NOF9xfzYqRFPh9gos5nK0xFZ7tQ9q0DXNF_R07v-AlJh6ti94o9fRG4PKXoon-SSHszTb7wNzOt3YbLXgv6o8cEZV7zG7tXmpBIN3RU9lN_nm2Hvh2uwjyjb8g_Ph9c1oq_tApexVEZYpSuUMkYtcYUn-MbI3XzcZc9ogd_pWmokEFaAGeDJFXuJJ0uaWoVhDb8dGEtCPJkSbwh44EqnCOgW4PMWa8zAeJI94Be-KJSs62utNCZPkijHOw1aeW4d0-mAaLxaLgphEdciI3J29onErRE3xrQ1po2x6C7ZGDMfM1n6eYfWQzAgAUpTMJHWf05PqwCnWMAKjVWQwpq53K6C5zqNOaviSnIMWe0APa5Msc-JYPhmis79_BdvRFCc" target="_blank" rel="noopener">Open in Mermaid Live ↗</a> <a class="top" href="#toc">↑ top</a></h2><div class="card"><pre class="mermaid">flowchart TB
+    subgraph C[controller]
+        C1[BookingController · SeatMapController · AdminBookingController · AdminRefundController]
+        C2[BrowseController · AdminCatalogController · AdminShowController]
+        C3[DiscountController · AdminPricingController · AdminRefundPolicyController]
+        C4[AuthController · AdminOutboxController]
+    end
+    subgraph S[service - interfaces = public API]
+        S1[booking: BookingService · BookingQueryService · SeatMapService]
+        S2[catalog: City/Theater/Screen/Movie/Show/BrowseService · ShowUsageChecker]
+        S3[pricing: PricingService · DiscountService · CheckoutPricing · DiscountUsage]
+        S4[refundpolicy: RefundPolicyService]
+        S5[payment: PaymentService · PaymentGateway]
+        S6[notification: OutboxService · NotificationSender]
+    end
+    subgraph I[service/*/internal - private implementations]
+        I1[BookingServiceImpl · SeatMapServiceImpl · JdbcShowUsageChecker · JdbcDiscountUsage]
+        I2[seathold: TwoLayerSeatHoldService · RedisSeatLockFilter · JdbcSeatHoldService]
+        I3[OutboxServiceImpl · OutboxPublisher · NotificationConsumer · LogNotificationSender]
+        I4[PaymentServiceImpl · MockPaymentGateway · other …Impl]
+    end
+    R[repository - Spring Data JPA]
+    M[model - entities, enums]
+    DT[dto - request / response records, BookingEventMessage]
+    X[common - errors, DbClock, RedisGuard, ratelimit]
+
+    C --&gt; S
+    S --&gt; I
+    I --&gt; R
+    R --&gt; M
+    C --&gt; DT
+    I --&gt; DT
+    I --&gt; X</pre></div></section>
+<section id="class"><h2>LLD 2 — class diagram (core) <a class="live" href="https://mermaid.live/edit#pako:eNqVWNlyGjkU_ZUunqCG5AOmXK4y9iTjCU6IcWpe_CKkC6hQS0QLNuOxvz1XakHUixrDg3G37nruKl4GVDEY_FkMqCDG3HCy0qR8lAV-wptiotSGy9W1klYrIUCnh3Mg9o5suw_viYUpL7n9xIXNHIEuXqoD__nD6v0V_em4hqEzoG_ZuADJtopLOyoWSgkgsiJ_rYkDxs1nRzRLpV1cUK6p47ZYaCAb0JeXHbzRvznoHadQ50e1oJeEwoEzGLlWgh3N-xsf7uGnA4MWRln3YLZKGkh4tmR_ZFlUVP5fzqDcKguS7r_AflwgWQnSPqgNyD5xlEgKoi3xNM98rZ6GBv94Yv9wHV4LYrmSyOWEbfF8UjqwJWp2irOTYN6WW9Fx-t2B3p-DNzdW6d_4UaeN0uPC8P9gVMzICjq85WZuuRCYmUuuS2BXks3pGpgTwFJHakkVODUsnWRmeB--55ZYZ0bFFI14q14dtL11ABAL4gzvTMURY4IpsfyqJNwRS9ejohUQQLH2GL9MFLwRPi_PsEIDgruDoxUIsAXmBd0yU0uw-0AZ0iXhJwsimZLD5DQ1r0omQXiZUowLX0qYXRHeqZKrt9TZZ6yMJFrYDJ63QKNh5lgu_3LU_TQqvm29VCLebqWxRNpUFq0SoUeYPwF2RzR2ih8Sk6c7OfCFgTSDENA2QVJm44IIEZHMhuzhSU3JHnQjdK0m58-nim6qlprrnccotuI3LqxFxyJhG-uTnI2YlgjXJADXy-oqPBvMBzD7OLmkwjGodOQknIv2P2xBe5C-XgPdKGdnmlM04z31s0XSypHKDXTCD1b0PDQtbFOeYOLnEKZqmlE7IniVggl7MD7UhD_pajTRtjNKPJjYVHRQE8xjOWU33FCFMTxLG7YqeBqmKKBKt7DKEkyFg8jvDsdfLaIMoAxsIXEifI24r_gOJoRuIl020ActPwxOiff1Qa8e2CQZN1HFsc5bqVTTUi9ZPy9mSnC6P6sZBzbQFJvb0K4xKqArKd6gtcIBOIGl0iHxc5bNquZ4ziiyRNvIljZKUnrvmtvK6KAh7bJrolcwjH25uc9ch9PWTKvcvbKf0c0n3JNW1TeCd1A9Ko6Tt87q2091hA0oKvMWL50Q-2xWRLujvvcgE_3qBuIsN9_pXc3eO2z4dZvT02_OLtTzOaXpFoKb9dDut1iaZLXS4I3yuKEjQpF2vZm4OvXwjAvm4Mq2p35YIWc4XDCbhjVOL6w5P31EZ1pRMAZDCrsQ0L7dv3J_VvnUGInR0xsHw1yVfCHLDXnAcOIGXKvdr8ryJadhUcEt0riyIRy3nbjQ_uWtvEOLsfxb_jMg7BTha07xHGGrq82vkfI8NVO1amt6jAg3rm7Fhw-X6Z2tQXQgON7CqvPWzTFQ1a8I76BMrwsVeevWGcjrq3dN8KE4Lv7_-DF7R2m_P4pt7QkZ2sbi0EvbmKm9tB1zpJe-3vp7SWvd4yQQTXybN40AcO8umzn8nUD1Dfc0U3aX69qXu9K0ue0FAGvbVZ6uM4jNbSklTFaE-m4SkMssE41JnkS4Ng4aYy1IzI2OZtf0MjtaYWcTzKRNljZbx1mOrsbUZIitMXjZ2csG42KAAkvCmf996-VxgJtUCY_48DhgsCR-2A5ePRlxVs33kuKR1Q4H3MBtGYIQfw6Lr19_AailZzI" target="_blank" rel="noopener">Open in Mermaid Live ↗</a> <a class="top" href="#toc">↑ top</a></h2><div class="card"><pre class="mermaid">classDiagram
+    class BookingController
+    class SeatMapController
+    class RateLimitFilter
+    class RateLimiter {
+        +tryAcquire(userId, endpoint) boolean
+    }
+    class RedisGuard {
+        &lt;&lt;circuit breaker&gt;&gt;
+    }
+    class BookingService {
+        &lt;&lt;interface&gt;&gt;
+        +hold(userId, HoldRequest) BookingResponse
+        +pay(userId, bookingId, idempotencyKey, paymentToken) BookingResponse
+        +cancel(userId, bookingId) BookingResponse
+        +cancelShow(showId) ShowCancellationResult
+        +cancelForShow(bookingId) void
+    }
+    class BookingServiceImpl
+    class BookingQueryService {
+        &lt;&lt;interface&gt;&gt;
+        +history(userId, cursor, size) PageResponse
+        +isStillConfirmedAndScheduled(bookingId) boolean
+        +refunds(RefundStatus) List~RefundResponse~
+    }
+    class SeatMapService {
+        &lt;&lt;interface&gt;&gt;
+        +seatMap(showId, ifNoneMatch) Result
+        +evict(showId) void
+    }
+    class SeatHoldService {
+        &lt;&lt;interface&gt;&gt;
+        +reserve(showId, sortedSeatIds, bookingId) Reservation
+        +abandon(Reservation) void
+        +claim(Reservation, holdFor) List~Long~
+        +extend(bookingId, expectedSeats, paymentWindow) Optional~Instant~
+        +confirm(bookingId, expectedSeats, bookedMarkerUntil) boolean
+        +release(bookingId) int
+        +releaseShow(showId, allSeatIds) void
+    }
+    class TwoLayerSeatHoldService
+    class RedisSeatLockFilter {
+        +tryAcquire(showId, seatIds, bookingId, ttl) Acquire
+        +extend(showId, seatIds, bookingId, ttl) void
+        +markBooked(showId, seatIds, bookingId, until) void
+        +release(showId, seatIds, bookingId, includeBooked) void
+        +releaseShow(showId, allSeatIds) void
+    }
+    class JdbcSeatHoldService
+    class CheckoutPricing {
+        &lt;&lt;interface&gt;&gt;
+        +price(show, seats, code, userId) PriceBreakdown
+        +validSeats(show, seatIds) List~Seat~
+    }
+    class PricingService {
+        &lt;&lt;interface&gt;&gt;
+        +priceSeats(show, seats) List~PricedSeat~
+    }
+    class DiscountService {
+        &lt;&lt;interface&gt;&gt;
+        +preview(code, userId, subtotal) DiscountQuote
+        +redeem(codeId, userId) void
+        +giveBack(codeId) void
+    }
+    class DiscountUsage {
+        &lt;&lt;interface&gt;&gt;
+        +redeemedBy(userId, codeId) int
+    }
+    class JdbcDiscountUsage
+    class RefundPolicyService {
+        &lt;&lt;interface&gt;&gt;
+        +refundPercent(theaterPolicyId, hoursBeforeShow) int
+    }
+    class PaymentService {
+        &lt;&lt;interface&gt;&gt;
+        +startPayment(bookingId, amount, idempotencyKey) Payment
+        +charge(payment, paymentToken) ChargeResult
+        +refundAtGateway(gatewayRef, amount) RefundResult
+        +markRefunded(paymentId, fully) void
+    }
+    class PaymentGateway {
+        &lt;&lt;interface&gt;&gt;
+        +charge(amount, idempotencyKey, paymentToken) ChargeResult
+        +refund(gatewayRef, amount) RefundResult
+    }
+    class MockPaymentGateway
+    class OutboxService {
+        &lt;&lt;interface&gt;&gt;
+        +publish(type, aggregateId, payload) void
+        +schedule(type, aggregateId, payload, dueAt) void
+        +cancelPending(aggregateId, type) int
+        +markProcessed(eventId) boolean
+    }
+    class OutboxPublisher {
+        +publishDue() int
+    }
+    class KafkaTemplate
+    class NotificationConsumer {
+        +on(BookingEventMessage) void
+        +dead(BookingEventMessage) void
+    }
+    class NotificationSender {
+        &lt;&lt;interface&gt;&gt;
+        +send(BookingEventMessage) void
+    }
+    class LogNotificationSender
+
+    RateLimitFilter --&gt; RateLimiter
+    RateLimiter --&gt; RedisGuard
+    BookingController --&gt; BookingService
+    BookingController --&gt; BookingQueryService
+    SeatMapController --&gt; SeatMapService
+    BookingService &lt;|.. BookingServiceImpl
+    BookingServiceImpl --&gt; SeatHoldService
+    BookingServiceImpl --&gt; CheckoutPricing
+    BookingServiceImpl --&gt; DiscountService
+    BookingServiceImpl --&gt; RefundPolicyService
+    BookingServiceImpl --&gt; PaymentService
+    BookingServiceImpl --&gt; OutboxService
+    BookingServiceImpl --&gt; SeatMapService
+    SeatHoldService &lt;|.. TwoLayerSeatHoldService
+    TwoLayerSeatHoldService --&gt; RedisSeatLockFilter
+    TwoLayerSeatHoldService --&gt; JdbcSeatHoldService
+    RedisSeatLockFilter --&gt; RedisGuard
+    CheckoutPricing --&gt; PricingService
+    CheckoutPricing --&gt; DiscountService
+    DiscountService --&gt; DiscountUsage
+    DiscountUsage &lt;|.. JdbcDiscountUsage
+    PaymentService --&gt; PaymentGateway
+    PaymentGateway &lt;|.. MockPaymentGateway
+    OutboxPublisher --&gt; KafkaTemplate
+    NotificationConsumer --&gt; OutboxService
+    NotificationConsumer --&gt; BookingQueryService
+    NotificationConsumer --&gt; NotificationSender
+    NotificationSender &lt;|.. LogNotificationSender</pre></div></section>
+<section id="er"><h2>LLD 3 — ER diagram (14 tables) <a class="live" href="https://mermaid.live/edit#pako:eNqlV21vIjkM_ivRfNqVuvsDKt0HCtMtKjAcMHtXCSkKMy7NNZPMZRIo1-1_X2de6LxuuTu-tMSxY_uxH5tXL1IxeNfEAz3hbK9ZspUEP-Pp5oH8-PHli3olmzt_tPFX5Jo8sawQV0dvCm_8ICv_NlxM6DKYTccPeG_rqQNozWMgnxbhbEZ-IzE8MivM563XtFC-sR6vfH9Rf6I8qeR4Ozcs2ElZc0WyJ6YhJrsT4SbDb-qYVaZbmnfBH86uykxpeR58n_ot8dbLIg0g0SSXZ0NOVnOAzoLxfXHZMGMzkoImGTBDPgkVPaOuwu9K4F8pTudQc997zZRa7Oz6TRDcTxff-m6royz9Hy2XNFy_565SuiYJe4as6_v7hUelex8qv9Lpxp_nnqWaR-iZCy7ri6OjkIfdDaQskMl0PQ7CxYaOg4mP921W-dlyZDl6mPuLAuqUcQdwNzdfv-LNINzcBH9S_3t1ne33GvbMAEU1BGTPIyZyEFppey2-u8-O77k0BBWW9--nB6YjLC8CCeOChD2SlGXZUemYYrk-dcVaCUCPRpP5FOuQjMP1Jpj7qyqSt1qPXeyMZAl0T10hQsNq1VgfGi5PI25OLmO3H74pbQJYFkQww42N-yRK7lui8hUNj1bGNFWCR-VzmCBphWA7AVVicgWFyWOSsMjwQzO0srEvjcw8YfWCviw4p1BwC0XqyriSzadd7V_6cEElQ-9qdaQYNYjm467VKCZyB7oHZic0p9RV1cr_Fs5G2P1kufLn03B-YfYK2ru43hBj0cpPbDVCryRNuLSm6uC6kmByb9m-p1D3IHWfRgTa8Eds1VYZ5_x1acITdeDQzvcvwTA8AeydJDX_uB7SmF1eL4e6HLBwm9Kq3pFvrGCa5mzZFacaEm6TIfER4NnZTnAu8lTwXuCLQbP11uM7fxLO_Injk9Fi7M_w_zryLta-ym1S78Xwu72gl_rKKryduWFAlv5qjARcd6QK78CE7Yk6YS805lmkrDQ9Ui4p8mo9Fc5Jm2FRUcETbtoCiGnLljvHyUxRpus6ZUKay8p_5N-qz3hGy83GLT0SiNEWl54UK4ozQazkf1v4XE_PX5mSO6KtAAcrxnunrM5uAEczXJU8uQQdAYbUnBfVALy0K_L4B5oC96UhfipKrgtNZndGGSa6kgpOypJ-VHO9jrT05aztSq7jb5nn8yVc-gASiPtb9Qm3EAovKUeuocz0dWw-h9qu1EdUmfsubxdyDSyrWqxHXM9eE7diV7oUPAz8mcv9EH5uHgzh52StAfPOSGcmqg22YsV8HayS5bAD_8LzEkknHoQPED4EhouGj9VS-D9zVyWhDf5Q4Vfn-DMmSZUBiZvLM5x6WdHtnUd2wup4bLje2FIH_EcagAOW3DSu88R5CXWifPZ3tBsb79Yrw0ajXb5J2UkoFv9iwCyCDV1vRqtNPmKmC_p76Id-vmUEY3-9zo9vR9MPRhAzBrNlsn6AJbwgSxRXGv3ZmMcu4CFhqlUEmWP96sabd0U8RBaX9dj9kn3derj5IVl77ldByc5bL7_GrFHrk4xQ5IgaT2waYwLL377l8dtPCRKY0Q" target="_blank" rel="noopener">Open in Mermaid Live ↗</a> <a class="top" href="#toc">↑ top</a></h2><div class="card"><pre class="mermaid">erDiagram
+    CITY ||--o{ THEATER : has
+    THEATER }o--o| REFUND_POLICY : &quot;override (NULL = default)&quot;
+    THEATER ||--o{ SCREEN : has
+    SCREEN ||--o{ SEAT : &quot;layout, shared by its shows&quot;
+    SCREEN ||--o{ SHOW : hosts
+    MOVIE ||--o{ SHOW : &quot;screened in&quot;
+    SHOW ||--o{ SEAT_LOCK : &quot;status per seat (locked or sold only)&quot;
+    SEAT ||--o{ SEAT_LOCK : &quot;locked as&quot;
+    BOOKING ||--o{ SEAT_LOCK : owns
+    APP_USER ||--o{ BOOKING : makes
+    SHOW ||--o{ BOOKING : for
+    BOOKING ||--o{ BOOKING_ITEM : &quot;priced seats&quot;
+    SEAT ||--o{ BOOKING_ITEM : &quot;sold as&quot;
+    BOOKING }o--o| DISCOUNT_CODE : uses
+    BOOKING ||--o{ PAYMENT : &quot;paid by&quot;
+    BOOKING ||..o{ OUTBOX_EVENT : &quot;aggregate_id (logical)&quot;
+
+    APP_USER {
+        bigint id PK
+        varchar email UK
+        varchar password_hash
+        varchar role &quot;ADMIN | CUSTOMER&quot;
+    }
+    CITY {
+        bigint id PK
+        varchar name
+        varchar state
+    }
+    THEATER {
+        bigint id PK
+        bigint city_id FK
+        varchar name
+        numeric latitude
+        numeric longitude
+        bigint refund_policy_id FK &quot;nullable&quot;
+        boolean active
+    }
+    SCREEN {
+        bigint id PK
+        bigint theater_id FK
+        varchar name
+        int layout_version
+    }
+    SEAT {
+        bigint id PK
+        bigint screen_id FK
+        varchar row_label
+        int seat_number
+        varchar seat_type &quot;REGULAR | PREMIUM&quot;
+        boolean active
+    }
+    MOVIE {
+        bigint id PK
+        varchar title
+        int duration_minutes
+        varchar language
+        varchar genres
+        varchar certificate
+    }
+    SHOW {
+        bigint id PK
+        bigint movie_id FK
+        bigint screen_id FK
+        timestamptz start_time
+        timestamptz end_time
+        numeric regular_price
+        numeric premium_price
+        numeric weekend_multiplier
+        varchar status &quot;SCHEDULED | CANCELLED&quot;
+        int version
+    }
+    DISCOUNT_CODE {
+        bigint id PK
+        varchar code UK
+        varchar type &quot;FLAT | PERCENT&quot;
+        numeric value
+        numeric max_discount
+        numeric min_order
+        int usage_limit
+        int used_count
+        int per_user_limit
+    }
+    REFUND_POLICY {
+        bigint id PK
+        varchar name
+        boolean is_default &quot;one true (partial unique)&quot;
+        jsonb rules &quot;minHoursBefore, refundPercent&quot;
+    }
+    BOOKING {
+        bigint id PK
+        bigint user_id FK
+        bigint show_id FK
+        varchar status
+        numeric subtotal
+        numeric discount_amount
+        numeric total_amount
+        bigint discount_code_id FK
+        boolean discount_redeemed
+        timestamptz hold_expires_at
+        numeric refund_amount
+        int refund_percent
+        varchar refund_reason
+        varchar refund_status
+    }
+    BOOKING_ITEM {
+        bigint id PK
+        bigint booking_id FK
+        bigint seat_id FK
+        varchar seat_label
+        numeric price
+    }
+    SEAT_LOCK {
+        bigint show_id PK
+        bigint seat_id PK
+        bigint booking_id FK
+        boolean booked
+        timestamptz held_until
+    }
+    PAYMENT {
+        bigint id PK
+        bigint booking_id FK
+        numeric amount
+        varchar status
+        varchar idempotency_key UK
+        varchar gateway_ref
+    }
+    OUTBOX_EVENT {
+        bigint id PK &quot;eventId&quot;
+        varchar event_type
+        bigint aggregate_id &quot;booking id&quot;
+        jsonb payload
+        varchar status &quot;NOT_STARTED | IN_QUEUE | PROCESSED | FAILED | CANCELLED&quot;
+        int attempts
+        timestamptz next_attempt_at
+        timestamptz sent_at
+        timestamptz processed_at
+    }</pre></div></section>
+<section id="seq-seatmap"><h2>LLD 4 — sequence: view seat map <a class="live" href="https://mermaid.live/edit#pako:eNptU1tvmzAU_itHvIxojZKxvAxpmZKA1mrQdNB0e0CKXHMCVsFm2LSrqv73HQfSqMl48eW7-Ph8-MXhKkfHB0fjnw4lx0CwomV1JoE-1hklu_oe22HNjWphA0zDqtNG1QegYa0RXDRMGkhji6fITMyaFNtHwfGclVhSgrnQ51iwtOCN0qZoMf0ZZbLnbMbzeRr78D28hYku1ZOezLyJppM0uFe78bWSOI6Z4eWoF6QxKZJeYGk1a_yZB64HGmrBWzXmjJc4sFllYL-GUph-azAhl40Pn6czEDsIb1kBtT0F9QVgpRG86bRX5gQ0vXQP9Ha10Pqd376oij2rzoDagSGOvc4HDZq3iBLc3m10VKnGHBRSDXXmR_jNOFj6kIZRuOpvrOHXZZiEg-9W5PAVvh1lKPOTwk7020rxh4MHldg7UA8X1wG490o90J3XCZRY5dtOGlHBnAp8ckejE2MbHP0vBULWeZ--kMPd4ipaLKMQJnAZRgENy_X6R7ifROuVnX2EpqXfR9PEtv28ien7ZG9-2yym_wnPRmSJNqDBjQaJf82qZLLAxZA4dcS5AIcqrZnI7ct4yRwKqMaMFpmT4451lcmcV0uzDyR9lpwg03ZIO12TM3N4RcP26z_WeQQb" target="_blank" rel="noopener">Open in Mermaid Live ↗</a> <a class="top" href="#toc">↑ top</a></h2><div class="card"><pre class="mermaid">sequenceDiagram
+    autonumber
+    actor U as Customer
+    participant SM as SeatMapService
+    participant R as Redis
+    participant DB as PostgreSQL
+
+    U-&gt;&gt;SM: GET /shows/42/seats (If-None-Match)
+    SM-&gt;&gt;R: GET seatmap:42 (2 s micro-cache)
+    alt cache hit
+        SM--&gt;&gt;U: 304 if ETag matches, else 200 cached map
+    else cache miss
+        SM-&gt;&gt;R: layout of the show&#x27;s screen (cached)
+        opt layout not cached
+            SM-&gt;&gt;DB: SELECT seats WHERE screen_id = ?
+        end
+        SM-&gt;&gt;DB: SELECT seat_lock WHERE show_id = 42 AND (booked OR held_until &gt; now())
+        SM-&gt;&gt;SM: merge → AVAILABLE / HELD / BOOKED / BLOCKED + prices + ETag
+        SM-&gt;&gt;R: SET seatmap:42 PX 2000
+        SM--&gt;&gt;U: 200 seat map + ETag + nextChangeAt
+    end</pre></div></section>
+<section id="seq-lock"><h2>LLD 5 — sequence: lock seats (two layers) <a class="live" href="https://mermaid.live/edit#pako:eNp9VFFvmzAQ_isnXkq1TEu7aVN5qARJqqChpAUy7SFS5MC1sQI2s03bqOp_3xmcNV2y8YR93_k-f9_5XrxClugF4Gn81aIocMzZg2L1UgB9rDVStPUalVsXRipYANMwarWR9T7QMGV4wRsmDKSJjafMYMJrbm54ZU7BoszCIim3XDxkqB55gXHdVMfIbGqR-ZNM2A5VhsxMZVW6lBP1u_JYcn0cG0c2eCu1eVCY3SVL0WMWH6-v0ySA23mWw6d1T0rDi97Ip7gcgKaicalfe3SaWHgA8WyUgqqCVqMKNsQpqLloDYJf2ZvDxfD8ICHKArAg321GGW2OowAEPptHVvlnru6Klyuy4-wQl00DUEh1HtH_Q0oqg2XWUxuAy45Ll5dNe5ZJyyAc3S3idLIKkwT8PE_g8xC0w7HKABO77o6wxR3gM9fGiecI0EmLAL4MryCbhHm2WszCH2GchFEyAd_JqUFIA0a2xQb3HLDSaM_UdLoBn5qnMwbWu4ZpjSX9wFoh26I6f1ewVyb_GYC9LdzMU7pPmE5g2Q6H629ANYqt3q_wueEKQRtWYafxPtAoapH9ggvSz-x1gukkGcMH4AZr_Vdtq3ZRMV77vebMcCkG5CeQwQdEO4kt0XiWTdK8k3BVyWJLJS-Hl19hPoPRfHaTxKMc_N6vg3SrfFeGhLjHJ1RgNkyQz_QUNUHfkO9USedJEoWj7yfCljhbM1FK4Z9bEhdXl05yhRUyjUdJ_7H2Ddv5WMiauvqI177P2D29cwcKyBKDouy9N9JJd4IxJSK9Y9NpV7Mm6Lv7HzQvhxedb4PO5Ulnuw7NAVHhUunHG4BHE6pmvLQT7mXpmQ3WuKTF0ivxnrWVWXqvFmYHXbYTBYWMapF22qakCeamodt-_Q0mUpV7" target="_blank" rel="noopener">Open in Mermaid Live ↗</a> <a class="top" href="#toc">↑ top</a></h2><div class="card"><pre class="mermaid">sequenceDiagram
+    autonumber
+    actor U as Customer
+    participant RL as RateLimitFilter
+    participant BS as BookingServiceImpl
+    participant SH as TwoLayerSeatHoldService
+    participant R as Redis
+    participant DB as PostgreSQL
+
+    U-&gt;&gt;RL: POST /bookings {showId, seatIds}
+    RL-&gt;&gt;R: INCR rl:user:hold:minute (limit 10)
+    RL-&gt;&gt;BS: hold()
+    BS-&gt;&gt;DB: nextval(&#x27;booking_id_seq&#x27;)
+    BS-&gt;&gt;SH: reserve(showId, sortedSeatIds, bookingId)
+    SH-&gt;&gt;R: Lua ACQUIRE_ALL (TTL 30 s)
+    alt any seat key exists
+        BS--&gt;&gt;U: 409 SEATS_UNAVAILABLE (Postgres not touched)
+    else keys set (or Redis bypassed by breaker)
+        BS-&gt;&gt;DB: TX: show FOR SHARE · checks · expire stale hold · price · insert booking HELD + items
+        BS-&gt;&gt;SH: claim(reservation, 10 min)
+        SH-&gt;&gt;DB: INSERT seat_lock … ON CONFLICT (sorted)
+        alt claimed fewer than requested
+            BS-&gt;&gt;DB: ROLLBACK
+            BS-&gt;&gt;SH: abandon() → Redis release
+            BS--&gt;&gt;U: 409 SEATS_UNAVAILABLE
+        else committed
+            SH-&gt;&gt;R: after commit: extend keys to 10 min
+            BS-&gt;&gt;R: evict seatmap:showId
+            BS--&gt;&gt;U: 201 HELD, holdExpiresAt
+        end
+    end</pre></div></section>
+<section id="seq-pay"><h2>LLD 6 — sequence: pay and confirm <a class="live" href="https://mermaid.live/edit#pako:eNp9VG1v2kAM_itWpElUawVk66ZGWqdCwotKSZaA1klI6EgMnMjlsuTSNqr63-e8FQrt-ETsx_bjxz4_a74MUDNAS_FvhpGPJmebhIlFBPRjmZJRJlaY1N--kgnMgaXQz1IlReOIWaK4z2MWKeh5hb8n5Y5HGw-TB-7jWMThKdLsFUhHpmqToPdrcopwC4CLAU9Pfc6wjGa5wEgNmcJHli-iCje_uL7ueQY4tjeD9qrikrafefDSjlkOrXGAIpaKOs4vbjE_q8J6HsWZPYPqlFlhlQPfI2GH-U9YZHr3SocE45AyqS0CPvFUUQGypVmojnLN7rsG1BRgYLswd8ybmUV5Op3Vd0i38hEoPAzB648scz6xzMaHT1Q3gBSZWobS30GLiuvfLuESBI_OGliCAaIAUsmXGbGuzc7NnztrOls61tQcT4eNuemtNh-wdQ1ga4UJ-FIIroymflmaek8PsM7QAH_Lkg1CK5KgEhaltB5cRiBjjGpBWaggQD_kEQaV5UiavdSDm_FB541eI2vyatvwB9w3uWL-7k1Kyjk34GtHf228SlmBMEwRWBwn8uEDKrpxIHRRHwP4QY1l2BDo29PB2L3bs2y4e_N-3_K8xiwztZJP0LPtWxJ4eRKW-lsMshDBG9m_l651N56algutchWKCXd10GF7tqdZ6OjLaM0TAWvGQ6LWKnmG9HigXS2Rz-j9huQ7CHwzrwTXGY1zndGuMVGo-A6wEuPLfmWte2fsEvnPTXyr2-l8Om_UqFU-O9bEtQZzaus_09uvb4iMplOonx5pWGVZOq5dCNwM852pX8HInpjLhmyr4vpGi3IFahUPd-Dj_Rcs2ZVjpIzEmoeV0MWbaF4oXTdVMhcs_oCc3unsV-eATlRzoD_aOWh0TAXjQXGMnxca3RWBC_pYaAGuWXFWtJcCVtxkL498chW7SZYsDuj61Ye7Nr_8A1IYzMc" target="_blank" rel="noopener">Open in Mermaid Live ↗</a> <a class="top" href="#toc">↑ top</a></h2><div class="card"><pre class="mermaid">sequenceDiagram
+    autonumber
+    actor U as Customer
+    participant BS as BookingServiceImpl
+    participant DB as PostgreSQL
+    participant R as Redis
+    participant PG as PaymentGateway
+
+    U-&gt;&gt;BS: POST /bookings/{id}/pay (Idempotency-Key)
+    BS-&gt;&gt;DB: payment by idempotency key? → replay the existing result
+    BS-&gt;&gt;DB: TX1: booking FOR UPDATE · show still SCHEDULED · extend seat_lock (≥ 5 min) · redeem discount · PAYMENT_PENDING · payment PENDING
+    BS-&gt;&gt;R: after commit: extend lock keys
+    BS-&gt;&gt;PG: charge (no transaction open)
+    alt declined
+        BS-&gt;&gt;DB: TX: payment FAILED · booking HELD · give discount back
+        BS--&gt;&gt;U: 402 PAYMENT_FAILED
+    else approved
+        BS-&gt;&gt;DB: TX2: seat_lock booked = true · CONFIRMED · payment SUCCESS · outbox BOOKING_CONFIRMED · schedule SHOW_REMINDER (show − 2 h)
+        alt confirm failed (lock lost / show cancelled)
+            BS-&gt;&gt;PG: refund full amount
+            BS-&gt;&gt;DB: TX3: booking EXPIRED + refund (100%, CONFIRM_FAILED) · payment REFUNDED · give discount back · release seats · outbox REFUND_PROCESSED
+            BS--&gt;&gt;U: 409 HOLD_EXPIRED (refunded)
+        else confirmed
+            BS-&gt;&gt;R: after commit: mark BOOKED until show end · evict seatmap
+            BS--&gt;&gt;U: 200 CONFIRMED
+        end
+    end</pre></div></section>
+<section id="seq-cancel"><h2>LLD 7 — sequence: customer cancels <a class="live" href="https://mermaid.live/edit#pako:eNptU--PmkAQ_VcmJE3OnFftfWnCBxMRtKZWtyBpm5CQFUbdCCzdH3dnjP97FxesPcs3Zt68eW9m9uRkPEfHBUfib41Vhj6jO0HLpALzUa14pcsNivY_U1xADFTCREvFyy5RU6FYxmpaKfCiJu9xfmDVLkLxwjKcl3VxjwxJgwxxq6uc8IJlxxZ-D_W9Bkq4VDuB0ffFf8gsV87kfY7MLtX0WGKlZlThKz0mlcXFT6ORF7lAVtEaBhsrWw5OLD8PMmom0gr3IgP0PRfWPz-50OJgugohJv54HUCih8PNZ5B7_goVVyCVUYD5TXVIXBDWLYrMSHlQezRqxEcbTevLEFKW92HPtZAebrmxaxh7liYkT63cD9AVA39BIViOfcBCIuS4pbpQYMlA6AJl750HgQVSg5WGIS14dujUT8bLSbBYBH4XsMqABEt_vpwBr67WWwDXasPfwFutvhpAekdgZwg1VnlTFX1Z_UjD4Nt86Qfh7WxcoNvGTcbLkqm_Ei_qDniU8HhpYphLKg4oZNcBzcmoi5WS1paS16pTTkuuzQmMYGhT145k1m3jwWJ67wB22c8dKjULVVpCFE8mQRQNpuP5jc3aHheEwTQ21nwYABmH6_l4sfiVXoP_zsyGUxKuGsLAt_3NoK5zMSpiF56Hw5vFPLZ6nD445gGWlOXNAz4ljjmIEhPzkzjtESTOuYE17zg6VplJKaHNoTi6zs3ttI-9DZ__APezTak" target="_blank" rel="noopener">Open in Mermaid Live ↗</a> <a class="top" href="#toc">↑ top</a></h2><div class="card"><pre class="mermaid">sequenceDiagram
+    autonumber
+    actor U as Customer
+    participant BS as BookingServiceImpl
+    participant RP as RefundPolicyService
+    participant DB as PostgreSQL
+    participant R as Redis
+    participant PG as PaymentGateway
+
+    U-&gt;&gt;BS: POST /bookings/{id}/cancel
+    BS-&gt;&gt;DB: TX1: booking FOR UPDATE · show not started
+    BS-&gt;&gt;RP: refundPercent(theater.refund_policy_id, hoursBeforeShow)
+    RP--&gt;&gt;BS: % (theater override, else default policy rules)
+    BS-&gt;&gt;DB: release seat_lock · CANCELLED · refund PENDING on booking · outbox BOOKING_CANCELLED · cancel pending SHOW_REMINDER
+    BS-&gt;&gt;R: after commit: release lock keys + BOOKED markers · evict seatmap
+    opt refund amount &gt; 0
+        BS-&gt;&gt;PG: refund(amount)
+        BS-&gt;&gt;DB: TX2: refund_status SUCCESS/FAILED · payment REFUNDED / PARTIALLY_REFUNDED · outbox REFUND_PROCESSED
+    end
+    BS--&gt;&gt;U: 200 CANCELLED + refund</pre></div></section>
+<section id="seq-showcancel"><h2>LLD 8 — sequence: admin cancels a show <a class="live" href="https://mermaid.live/edit#pako:eNp1U--L2kAQ_VeGQMGjPcz1S8EPB4mJ3oEX08SjLQRkTEZdTHbT_XFWxP-9uyZ6Lbb7KTPz8ubtm9mjV4qKvBF4in4a4iVFDDcSm4KDPWi04KZZkezjUgsJAaCCoGoY77ItSs1K1iLXEOauGAqxY3yTk3xjJT03bX2LjEKHTIXSG0n519ktInOAjCqmbmvp9Pw3Hhrieoqa9ngoej3B_eNjmI8gnecLGKITOlRbsVfDI6tOwxLtNXtBYW6xUTiCxfcROAxM5hm8plGwiGGwR6YVrO2VGb9f12yz1bAVdaXuoDC-v_oCSqM2CsZBMo5nszi65N9IKiY4fISHrlEtRAuE5Rae4lkEQ0iDHy9xslimcRI9J1ObGc-TyXP2YklWnX0wEHsOWiJX1nhLd9dx_SVcUk2oCBSh1dq3v9EjaW14BQ--_wHyp_m35Q1CGL0Sv_5T7CyzLNbK6rIM7ohWw94O4qr9vXRVmU5Hl_5rU9eAjTBc_wPYXccBl72vffu2GzNk8eQ1if5sQrzqguvHmSm7-pK7mQ7Qtq1FuYMdHd6HR3Y59dm4BltAq69mSlvj1ZXKcgUj-Oz74IjGZxtqdLPISJlae5_Aa0g2yCr3iI6Fp7fUUGGDwqtojRZTeCcHc28pP_DSlrQ0ZDOmrezi9g-uT59-A5kKHrQ" target="_blank" rel="noopener">Open in Mermaid Live ↗</a> <a class="top" href="#toc">↑ top</a></h2><div class="card"><pre class="mermaid">sequenceDiagram
+    autonumber
+    actor A as Admin
+    participant BS as BookingServiceImpl
+    participant DB as PostgreSQL
+    participant R as Redis
+    participant PG as PaymentGateway
+
+    A-&gt;&gt;BS: POST /admin/shows/{id}/cancel
+    BS-&gt;&gt;DB: TX: show FOR UPDATE (waits for in-flight holds) · status CANCELLED · version + 1
+    loop each HELD / PAYMENT_PENDING / CONFIRMED booking (own transaction)
+        BS-&gt;&gt;DB: release seats · CANCELLED · refund 100% SHOW_CANCELLED · outbox SHOW_CANCELLED · cancel reminder
+        opt was CONFIRMED
+            BS-&gt;&gt;PG: refund full amount
+            BS-&gt;&gt;DB: refund_status · payment REFUNDED
+        end
+    end
+    BS-&gt;&gt;R: releaseShow (all lock keys) · evict seatmap and listings
+    BS--&gt;&gt;A: 200 ShowCancellationResult</pre></div></section>
+<section id="seq-events"><h2>LLD 9 — sequence: events → Kafka → notification <a class="live" href="https://mermaid.live/edit#pako:eNptVF1vozAQ_Csrnqgu0al9u-gaKQUqRckRWojUh0iRgSWxYmzONtdEVf_7rQn5uGt4AXbH49nZtT-8QpXojcAz-LtFWWDI2UazeiWBHtZaJds6R338b5i2vOANkxbCJ2AGEmXsRmP6MgdftTZX-zX-QWnvvi5IHH7RYZI2F9xsUYNPaH2ABzA3Vszcihmrdgz8XKkdl5thx34LHDhwrCyveMEsVzJQ0rT1Lenx_9AUZemAR6hQqoGzrgFobJBZeN9ygZAzW2yBG6haIY549yTD8Th8GkEazaMgA2OZbQ08QrzI1mk2ec2iECZxCBL3ds2sxbpxb_j5CFK9-3fwvHiFZRJOsgjS2TSB-SKYReG_G8xGYEgp-Ds8EHdvybS8u8CYsMCKHXEKLDdYXjLXKnt503j9soyW0cDRdnJ6NZdVKAxCxajyEr6D5TVSl2-T9lUZ-Ab3gy-F5qRKVRX4z5PpnMxglaX212x_vZns9Z4_ZsQdjKBEwakf8HSsOHIz8AuNYRs84oJeQ_Y2Ik69S7QqKE-i_VORsGof7n88QPK6CKI0jcJ-484xoZGVh0sOlIZgEgfRfH7dhGDYd2HHG_DLthFugLBn6rzSWHM3TJC39tQhMpWGSm4oWihZcV1fN-aa9EJ0nR-P41PneUmGKksn9QDHKegOxHkGzs7ReCMoZ1owIHLcF9i4UT_ZkL2BVkKYrjGnoEZLQ29VwwtzipXkzFCgde3qMt4APDpWNeOluzg-Vp7dYo0r-ll5JVasFXblfTqYuz_SgywoZXWLFGmbkgzrL5k-_PkX_uJtAQ" target="_blank" rel="noopener">Open in Mermaid Live ↗</a> <a class="top" href="#toc">↑ top</a></h2><div class="card"><pre class="mermaid">sequenceDiagram
+    autonumber
+    participant DB as PostgreSQL (outbox_event)
+    participant P as OutboxPublisher (every 2 s)
+    participant K as Kafka (booking-events)
+    participant C as NotificationConsumer
+    participant N as NotificationSender
+
+    loop every 2 s, repeat while batch is full
+        P-&gt;&gt;DB: SELECT status = NOT_STARTED AND next_attempt_at &lt;= now() FOR UPDATE SKIP LOCKED
+        P-&gt;&gt;K: send (key = bookingId)
+        alt acknowledged
+            P-&gt;&gt;DB: status IN_QUEUE, sent_at = now()
+        else failed / timeout
+            P-&gt;&gt;DB: attempts + 1, next_attempt_at backoff (FAILED after max)
+        end
+    end
+    K-&gt;&gt;C: deliver BookingEventMessage
+    C-&gt;&gt;DB: TX: markProcessed (IN_QUEUE → PROCESSED)
+    alt already PROCESSED or CANCELLED
+        C--&gt;&gt;K: skip (duplicate)
+    else reminder but booking no longer confirmed
+        C--&gt;&gt;K: skip
+    else
+        C-&gt;&gt;N: send (idempotency key = eventId)
+    end
+    Note over C,K: exception → TX rolls back → retry topics → dead-letter topic</pre></div></section>
+<section id="st-booking"><h2>LLD 10 — state machine: booking <a class="live" href="https://mermaid.live/edit#pako:eNp9ktFPwjAQxv-VSxMTUIhAfPLBhMBUEpgEfdA4Q2rvxhq2dmk7hBD-dzs3XELEvvW7u999-do9ExqJ3QKzjjsaS74yPOtuBpECf94vP6DbvYPHYDqGW0h0iq12VfqRytp8-DYLwpflPAjHk_DBt-V812pDVAx6_RtItVgDbR0pJOwASit0oRwYQqKMsKKdQkrw6Cm8nyxmQblZJNysCPQarsASdxaEVrE0_wJq1_UskkilIjwa-3WykhtS8MnF-jwqeJ1PFpWTai_EXKYNjBdOdw3FhcKTeJrJMr0lbXNpyC658zFZ6wktJOMdIGjlQ-F4mu9oGI6C6bRazpWg1Id7DRwzqWrBgk30VzXXpHZ2uPac61SKHVSu_yQeO_u93gXrAMvIZFxi-V32EXOJf7_IXyKGFPMidRE7lG1lGM87JXzJmYK8UuTY_K5aPnwDUufBgw" target="_blank" rel="noopener">Open in Mermaid Live ↗</a> <a class="top" href="#toc">↑ top</a></h2><div class="card"><pre class="mermaid">stateDiagram-v2
+    [*] --&gt; HELD : hold()
+    HELD --&gt; PAYMENT_PENDING : pay() — lock extended, discount redeemed
+    PAYMENT_PENDING --&gt; CONFIRMED : charge ok + seats confirmed
+    PAYMENT_PENDING --&gt; HELD : charge declined — discount given back
+    PAYMENT_PENDING --&gt; EXPIRED : confirm failed — auto-refund
+    HELD --&gt; EXPIRED : hold_expires_at passed (derived on read)
+    HELD --&gt; CANCELLED : cancel() / admin cancels show
+    CONFIRMED --&gt; CANCELLED : cancel() — policy refund / admin cancels show — 100%</pre></div></section>
+<section id="st-seat"><h2>LLD 11 — state machine: seat (per show) <a class="live" href="https://mermaid.live/edit#pako:eNp9kVtrAjEQhf_KkKfaKq37VsHCigstXfCh0JemSJrMajAXyaUi4n9v4i66SDFvmTn55pzMgXArkEyA-MACziVbOaZHvwU1kM7X_TeMRi9QfpZvdTmrK5iAseCRhaWyfAPO7lrlRZH1r1U9T1KumNRAYzF-LrIUpPHoAgq4W6MSy2iCVDBNyB08wPgJtDSDlnciZNRssXivTjBrGunOuB9rNwk0heAiXr3p2-0N2jLv8-zsJMXd-2GCppYH5qFxiIMbHM4MRwWPZx8NkyrReukEKkzhWkjn-xqTbUuz6nD_A8gQiEanmRR5MwdKwho10nShRGDDogqUHLOMxWA_9oanVv6HVIlbcVlkVz7-AQdylQU" target="_blank" rel="noopener">Open in Mermaid Live ↗</a> <a class="top" href="#toc">↑ top</a></h2><div class="card"><pre class="mermaid">stateDiagram-v2
+    [*] --&gt; AVAILABLE : no seat_lock row
+    AVAILABLE --&gt; HELD : claim → row inserted (held_until = now + 10 min)
+    HELD --&gt; BOOKED : confirm → booked = true
+    HELD --&gt; AVAILABLE : held_until passed (row stays, counts as free)
+    HELD --&gt; AVAILABLE : cancel / confirm failed → row deleted
+    BOOKED --&gt; AVAILABLE : booking cancelled → row deleted</pre></div></section>
+<section id="st-outbox"><h2>LLD 12 — state machine: outbox event <a class="live" href="https://mermaid.live/edit#pako:eNp1kU1rAjEQhv_KkGOrUKUnDwXRLUhFW1dP3SKzyawb3EwkH7VF_O_NqvQDbG55k-fhTeYgpFUkBiB8wEBjjRuHpvveLxjSer15g273AWbz5TpfDhfLbAwD2DsdAjFohlATlNFrJu8hOGSPMmjLZ_w31moms_XLKltlybGLZaN9TaoDT1htEVBu2e4bUhtS1-m_JS4CqFAnCIrYv-vdA6ZiZhc83EKvA2WS2qq6rnscTqYnk8GPH84Ryvq_BqPhbJRNz5Qjo1mRA1sBgkSW1LRFSmu3mjdnwfeDW_p5MR9leX6ipWUfTaJrZNViOogOiJQY1Kqdx6EQ6XMNFWlTCEUVxiYU4thewxhs_skyHQUXKSVxp37Gd4mPXxmWldQ" target="_blank" rel="noopener">Open in Mermaid Live ↗</a> <a class="top" href="#toc">↑ top</a></h2><div class="card"><pre class="mermaid">stateDiagram-v2
+    [*] --&gt; NOT_STARTED : written in the business transaction
+    NOT_STARTED --&gt; IN_QUEUE : published, Kafka acknowledged
+    NOT_STARTED --&gt; NOT_STARTED : publish failed — attempts + 1, backoff
+    NOT_STARTED --&gt; FAILED : max attempts reached
+    NOT_STARTED --&gt; CANCELLED : reminder of a cancelled booking
+    IN_QUEUE --&gt; PROCESSED : consumer handled it</pre></div></section>
+</main>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({ startOnLoad: true, theme: "neutral", securityLevel: "loose",
+                        flowchart: { useMaxWidth: true }, er: { useMaxWidth: true } });
+</script>
+</body>
+</html>

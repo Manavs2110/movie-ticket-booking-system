@@ -1,0 +1,109 @@
+spring:
+  application:
+    name: movie-ticket-booking-system
+  datasource:
+    url: jdbc:postgresql://localhost:5434/moviebooking
+    username: moviebooking
+    password: moviebooking
+    hikari:
+      maximum-pool-size: 20
+      connection-timeout: 2000
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc.time_zone: UTC
+  flyway:
+    enabled: true
+  data:
+    redis:
+      host: localhost
+      port: 6380
+      timeout: 200ms
+      connect-timeout: 500ms
+  cache:
+    type: redis
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      acks: all
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        enable.idempotence: true
+        max.block.ms: 5000
+        request.timeout.ms: 5000
+        delivery.timeout.ms: 10000
+    consumer:
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: com.moviebooking.dto.notification
+        spring.json.value.default.type: com.moviebooking.dto.notification.BookingEventMessage
+        spring.json.use.type.headers: false
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    time-zone: Asia/Kolkata
+
+server:
+  port: 8080
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      redis:
+        sliding-window-size: 20
+        minimum-number-of-calls: 10
+        failure-rate-threshold: 50
+        slow-call-duration-threshold: 200ms
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+
+app:
+  zone: Asia/Kolkata
+  scheduling:
+    enabled: true
+  booking:
+    hold-duration: PT10M          # seat lock
+    payment-window: PT5M          # lock extended to at least this on pay
+    max-seats-per-booking: 10
+  seat-lock:
+    redis-initial-ttl: PT30S      # before the Postgres commit (ghost-lock bound)
+  seat-map:
+    micro-cache-ttl: PT2S
+  rate-limit:
+    hold-per-minute: 10
+    pay-per-minute: 5
+    default-per-minute: 100
+  show:
+    cleaning-buffer: PT15M
+    default-weekend-multiplier: 1.25   # used when a new show doesn't send weekendMultiplier
+  reminder:
+    lead-time: PT2H               # SHOW_REMINDER due at show start − lead-time
+  outbox:
+    poll-interval: PT2S
+    batch-size: 500
+    max-attempts: 8
+    topic: booking-events
+    ack-timeout: PT5S
+  notification:
+    consumer-group: notification
+    retry-attempts: 4             # 1 try + 3 retry topics, then the dead-letter topic
+    retry-delay-ms: 2000
+  geo:
+    default-radius-km: 25
+  cache-ttl:
+    cities: PT1H
+    movie: PT5M
+    movies-in-city: PT60S
+    shows-for-movie: PT60S
+    seat-layout: PT1H
+
+logging:
+  level:
+    com.moviebooking: INFO
+    org.apache.kafka: WARN

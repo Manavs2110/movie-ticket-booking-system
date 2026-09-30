@@ -1,0 +1,633 @@
+{
+  "info": {
+    "_postman_id": "1178b635-63d1-5b09-8964-fd5bf95cc280",
+    "name": "Movie Ticket Booking — Lifecycle (16 steps)",
+    "description": "One customer's journey in 16 requests: register → log in → admin schedules a show → theaters near me → seat map → price preview → lock → rival rejected → pay → pay again → events → history → cancel + refund → events.\n\nEvery URL, id, login and body is written out in full. **Start from a fresh database and run in order** (`docker compose down -v && docker compose up -d --build`): screen 7, show 337, seats 721 (A1) / 731 (B1) / 732 (B2), booking 1.\n\nWatch the Redis locks live while you run it: `./scripts/redis-locks.sh`",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Register Riya",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 201\", () => pm.response.to.have.status(201));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "url": "http://localhost:8080/api/auth/register",
+        "header": [],
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"riya@test.com\",\n  \"password\": \"Password@123\",\n  \"fullName\": \"Riya Sharma\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Password stored as a BCrypt hash; the role is always CUSTOMER."
+      }
+    },
+    {
+      "name": "2. Log in (who am I)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:8080/api/auth/me",
+        "header": [],
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "riya@test.com",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "Password@123",
+              "type": "string"
+            }
+          ]
+        },
+        "description": "Stateless HTTP Basic: every request carries the credentials."
+      }
+    },
+    {
+      "name": "3. Admin: create a screen at PVR Orion Mall",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 201\", () => pm.response.to.have.status(201));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "url": "http://localhost:8080/api/admin/theaters/1/screens",
+        "header": [],
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "admin@moviebooking.com",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "Admin@123",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Lifecycle Screen\",\n  \"rows\": [\n    {\n      \"rowLabel\": \"A\",\n      \"seatCount\": 10,\n      \"seatType\": \"REGULAR\"\n    },\n    {\n      \"rowLabel\": \"B\",\n      \"seatCount\": 10,\n      \"seatType\": \"PREMIUM\"\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Becomes screen 7 on a fresh database: A1–A10 = seats 721–730 (regular), B1–B10 = 731–740 (premium)."
+      }
+    },
+    {
+      "name": "4. Admin: schedule the show (Fri 18 Dec 2026, 19:00 IST)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 201\", () => pm.response.to.have.status(201));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "url": "http://localhost:8080/api/admin/shows",
+        "header": [],
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "admin@moviebooking.com",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "Admin@123",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"movieId\": 3,\n  \"screenId\": 7,\n  \"startTime\": \"2026-12-18T19:00:00+05:30\",\n  \"regularPrice\": 200,\n  \"premiumPrice\": 300\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Becomes show 337 on a fresh database. ₹200 regular / ₹300 premium, weekend ×1.25 (Friday: weekday prices)."
+      }
+    },
+    {
+      "name": "5. Theaters near me showing the movie",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:8080/api/movies/3/shows?cityId=1&date=2026-12-18&lat=13.0035&lng=77.5647",
+        "header": [],
+        "auth": {
+          "type": "noauth"
+        },
+        "description": "Nearest first: PVR Orion Mall with show 337."
+      }
+    },
+    {
+      "name": "6. Seat map",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:8080/api/shows/337/seats",
+        "header": [],
+        "auth": {
+          "type": "noauth"
+        },
+        "description": "20 seats AVAILABLE; the response carries an ETag for cheap polling."
+      }
+    },
+    {
+      "name": "7. Price preview A1 + B1 with FIRST50",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "url": "http://localhost:8080/api/discounts/preview",
+        "header": [],
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "riya@test.com",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "Password@123",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"code\": \"FIRST50\",\n  \"showId\": 337,\n  \"seatIds\": [\n    721,\n    731\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "500 − 50 = 450. Nothing is locked and the code isn't counted yet."
+      }
+    },
+    {
+      "name": "8. Riya locks A1 + B1",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 201\", () => pm.response.to.have.status(201));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "url": "http://localhost:8080/api/bookings",
+        "header": [],
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "riya@test.com",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "Password@123",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"showId\": 337,\n  \"seatIds\": [\n    721,\n    731\n  ],\n  \"discountCode\": \"FIRST50\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Booking 1, HELD for 10 min. Watch ./scripts/redis-locks.sh: two keys with value 1, TTL ≈ 600 s."
+      }
+    },
+    {
+      "name": "9. Register Arjun",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 201\", () => pm.response.to.have.status(201));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "url": "http://localhost:8080/api/auth/register",
+        "header": [],
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"arjun@test.com\",\n  \"password\": \"Password@123\",\n  \"fullName\": \"Arjun Mehta\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "10. Arjun tries B1 + B2 (B1 is Riya's)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 409\", () => pm.response.to.have.status(409));",
+              "pm.test(\"error code SEATS_UNAVAILABLE\", () => pm.expect(pm.response.json().code).to.eql(\"SEATS_UNAVAILABLE\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "url": "http://localhost:8080/api/bookings",
+        "header": [],
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "arjun@test.com",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "Password@123",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"showId\": 337,\n  \"seatIds\": [\n    731,\n    732\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "409 with unavailableSeatIds = [731]; B2 is not locked either (all or nothing)."
+      }
+    },
+    {
+      "name": "11. Riya pays",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "url": "http://localhost:8080/api/bookings/1/pay",
+        "header": [
+          {
+            "key": "Idempotency-Key",
+            "value": "riya-pay-1"
+          }
+        ],
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "riya@test.com",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "Password@123",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"paymentToken\": \"tok_visa\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "CONFIRMED. Redis values turn BOOKED (kept until the show ends)."
+      }
+    },
+    {
+      "name": "12. Same payment again (double click)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "url": "http://localhost:8080/api/bookings/1/pay",
+        "header": [
+          {
+            "key": "Idempotency-Key",
+            "value": "riya-pay-1"
+          }
+        ],
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "riya@test.com",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "Password@123",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"paymentToken\": \"tok_visa\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Same Idempotency-Key → same result, no second charge."
+      }
+    },
+    {
+      "name": "13. Events for the booking",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// give the outbox publisher (every 2 s) and the Kafka consumer time to catch up",
+              "setTimeout(() => {}, 4000);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:8080/api/admin/outbox?bookingId=1",
+        "header": [],
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "admin@moviebooking.com",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "Admin@123",
+              "type": "string"
+            }
+          ]
+        },
+        "description": "Waits 4 s first. BOOKING_CONFIRMED → PROCESSED; SHOW_REMINDER NOT_STARTED (due 2 h before the show)."
+      }
+    },
+    {
+      "name": "14. Riya's booking history",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:8080/api/me/bookings?size=5",
+        "header": [],
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "riya@test.com",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "Password@123",
+              "type": "string"
+            }
+          ]
+        },
+        "description": "Cursor-paginated."
+      }
+    },
+    {
+      "name": "15. Riya cancels (show > 24 h away → 100 %)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "url": "http://localhost:8080/api/bookings/1/cancel",
+        "header": [],
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "riya@test.com",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "Password@123",
+              "type": "string"
+            }
+          ]
+        },
+        "description": "CANCELLED, refund 450 (100 %). Seats released in Postgres and Redis; reminder cancelled."
+      }
+    },
+    {
+      "name": "16. Events after the cancel",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// give the outbox publisher (every 2 s) and the Kafka consumer time to catch up",
+              "setTimeout(() => {}, 4000);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:8080/api/admin/outbox?bookingId=1",
+        "header": [],
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "admin@moviebooking.com",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "Admin@123",
+              "type": "string"
+            }
+          ]
+        },
+        "description": "Waits 4 s first. BOOKING_CANCELLED + REFUND_PROCESSED → PROCESSED; SHOW_REMINDER → CANCELLED."
+      }
+    }
+  ]
+}

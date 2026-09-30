@@ -1,0 +1,8 @@
+target/
+.idea/
+*.iml
+.git/
+docs/
+scripts/
+*.log
+*.pdf

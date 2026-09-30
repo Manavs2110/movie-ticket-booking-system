@@ -1,0 +1,11 @@
+target/
+*.log
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# assignment brief (not published)
+Movie Ticket Booking System.pdf
+__pycache__/
+*.pyc
